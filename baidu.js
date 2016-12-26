@@ -1,6 +1,6 @@
-setTimeout(init, 300);
+clean();
 
-function init() {
+function clean() {
   var headerBg = document.querySelector('#s_top_wrap');
   var headerLeft = document.querySelector('#s_upfunc_menus');
   var headerRight = document.querySelector('#u_sp');

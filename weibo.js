@@ -1,6 +1,6 @@
-setTimeout(init, 1000);
+clean();
 
-function init() {
+function clean() {
   var topTip = document.querySelector('.gn_topmenulist_tips');
   var hotTip = document.querySelector('div[node-type="recommendTopic"]');
   var rightBar = document.querySelector('.WB_main_r');
