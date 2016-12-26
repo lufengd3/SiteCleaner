@@ -1,0 +1,13 @@
+{
+    "name": "SiteCleaner",
+    "version": "1.0",
+    "manifest_version": 2,
+    "content_scripts": [{
+        "js": ["contentscript.js"],
+        "matches": ["<all_urls>"]
+    }],
+    "web_accessible_resources": [
+        "weibo.js",
+        "baidu.js"
+    ]
+}
