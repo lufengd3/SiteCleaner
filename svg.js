@@ -3,7 +3,7 @@ setTimeout(function() {
     rootId: 'J_SectionDrop'
   };
 
-  new SvgGenerator(conf);
+  // new SvgGenerator(conf);
 }, 1000);
 
 function SvgGenerator() {
@@ -23,18 +23,61 @@ SvgGenerator.prototype = {
 
     if (self.rootElm) {
       var domId = 'svg-container';
+      var btnId = 'svg-export-btn';
+
       self.rootElmInfo = self.rootElm.getBoundingClientRect();
 
-      self.addHtmlContainerWithId(domId);
-      self.svgHandler = self.drawContainer(domId);
+      self.modifySiteUI(btnId);
 
-      self.processChildren(self.rootElm);
-      setTimeout(function() {
-        // console.log(self.svgHandler.svg());
-      }, 5000);
+      var btn = document.getElementById(btnId);
+      btn.onclick = function() {
+        self.generateSvg(domId);
+      }
+
     } else {
       throw new Error('No such element with id ' + conf.rootId);
     }
+  },
+  modifySiteUI: function(id) {
+    var self = this;
+    var btnHtml = '<div class="btn-wrap" id="' + id + '"><button class="btn-save">导出到设计版</button></div>';
+    var container = document.querySelector('.rme-header-right');
+
+    container.innerHTML = btnHtml + container.innerHTML;
+  },
+  generateSvg: function(domId) {
+    var self = this;
+
+    self.addHtmlContainerWithId(domId);
+
+    self.svgHandler = self.drawContainer(domId);
+
+    self.processChildren(self.rootElm);
+
+    setTimeout(function() {
+      var svgData = self.svgHandler.svg();
+      var input = document.querySelector('.form-input input');
+      var filename = 'RME' + new Date().getTime();
+      if (input && input.value) {
+        filename = input.value;
+      }
+      console.log(svgData);
+
+      $.ajax({
+          url:"http://localhost:8888",
+          dataType: 'jsonp',
+          data: {
+            filename: filename,
+            svgData: encodeURIComponent(svgData)
+          },
+          success:function(res){
+              console.log(res);
+          },
+          error:function(err){
+            console.error(err);
+          }
+      });
+    }, 2000);
   },
   getRootElm: function(id) {
     var elm = document.getElementById(id);
@@ -52,7 +95,7 @@ SvgGenerator.prototype = {
 
     dom.setAttribute('id', id);
     dom.onclick = function() {
-      dom.style.display = 'none';
+      dom.remove();
     };
     dom.style.position = 'fixed';
     dom.style.top = 0;
@@ -191,7 +234,6 @@ SvgGenerator.prototype = {
     });
     handler.fill(dom.style.color);
     handler.move(elm.coordinate.x, elm.coordinate.y);
-    handler.dy(0);
 
     // wrap text
     var textWidth = handler.node.getComputedTextLength();
@@ -199,8 +241,20 @@ SvgGenerator.prototype = {
     if (textWidth > svgParentWidth) {
       var newText = self.getWrappedText(text, textWidth, svgParentWidth);
 
+      // handler.text(newText);
+
+      var baseX = handler.x();
+      var baseY = handler.y();
+      console.log(baseY);
+
       handler.clear();
-      handler.text(newText);
+      handler.text(function(add) {
+        newText.map(function(words, index) {
+          console.log(index);
+          var y = 36 * index + baseY;
+          add.tspan(words).y(y).x(baseX)
+        })
+      });
     }
 
   },
@@ -221,7 +275,7 @@ SvgGenerator.prototype = {
         index += wordsEachLine;
       }
 
-      return wordsArr.join('\n');
+      return wordsArr;
     }
 
   }

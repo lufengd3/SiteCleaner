@@ -2,6 +2,7 @@ var scriptName = getScriptName();
 
 if (scriptName === 'svg.js') {
   loadScript('svg-lib.js');
+  loadScript('jquery.js');
 }
 
 loadScript(scriptName);
